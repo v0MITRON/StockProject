@@ -13,8 +13,8 @@ import datetime
 import h5py
 import numpy as np
 
-file = '/home/matt/AnacondaProjects/h5pyTests/DDD.h5'
+file = '/home/matt/AnacondaProjects/h5pyTests/stockData.h5'
 
-table = pd.read_hdf(file, 'table')
+table = pd.read_hdf(file, '/history/DDD')
 
 print(table.tail(10))

@@ -32,16 +32,10 @@ selCompanyInfo = companyinfo[['Symbol', 'Sector', 'industry']]
 
 # Short df for test purposes.  Remove and use 'selCompanyInfo' for full exchange list.
 testdf = selCompanyInfo.head(5)
-print(testdf)
-
-# Open/create HDF5 file using PyTable's open_file() function
-#h5file = open_file("stockData.h5", mode="w", title="Stock Data")
 
 # Open/create HDF5 file using pandas
-store = pd.HDFStore('stockData.h5')
-
-# Create group for Stock History via PyTables
-#group = h5file.create_group("/", 'history', 'Stock History')
+# Compress using default zlib
+store = pd.HDFStore('stockData_compressed.h5', complevel=9, complib='zlib')
 
 # Iterate down df pulling stock symbol for history download
 stockindex = 0

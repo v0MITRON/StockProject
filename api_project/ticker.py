@@ -70,10 +70,31 @@ def lib():
 
 def irequest(symbol, startDate, endDate):
     tiingoUrl = u1 + symbol + u2 + str(startDate) + u3 + str(endDate) + token
+    df = symbol + 'df'
 
-    stock_history = pd.read_json(tiingoUrl)
-    stock_history = pd.DataFrame(stock_history)
-    type(stock_history)
+    tempdf = pd.read_json(tiingoUrl)
+    tempdf = pd.DataFrame(tempdf)
+    type(tempdf)
+
+    df = pd.DataFrame({'open': tempdf['open'],
+                       'adjOpen': tempdf['adjOpen'],
+                       'high': tempdf['high'],
+                       'adjHigh': tempdf['adjHigh'],
+                       'low': tempdf['low'],
+                       'adjLow': tempdf['adjLow'],
+                       'close': tempdf['close'],
+                       'adjClose': tempdf['adjClose'],
+                       'volume': tempdf['volume'],
+                       'adjVolume': tempdf['adjVolume'],
+                       'splitFactor': tempdf['splitFactor'],
+                       'date': tempdf['date'],
+                       })
+
+    df = df.set_index(pd.DatetimeIndex(df["date"]))   
+    df = df[['open', 'adjOpen', 'high', 'adjHigh', 'low', 'adjLow', 'close',
+             'adjClose', 'volume', 'adjVolume', 'splitFactor']]
+
+    return df
 
 
 if __name__ == "__main__":

@@ -70,7 +70,7 @@ def lib():
 
 def irequest(symbol, startDate, endDate):
     tiingoUrl = u1 + symbol + u2 + str(startDate) + u3 + str(endDate) + token
-    df = symbol + 'df'
+    df = symbol
 
     tempdf = pd.read_json(tiingoUrl)
     tempdf = pd.DataFrame(tempdf)

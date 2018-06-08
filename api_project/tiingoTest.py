@@ -1,10 +1,23 @@
 import ticker
+import analysis
 import pandas as pd
+import datetime
 
-ticker.lib()
+startDate = datetime.date(2015, 1, 2)
+endDate = datetime.date.today()
 
-file = '/home/matt/Projects/Stock Project/API_project/api_project/stockDB.h5'
+#ticker.lib()
 
-table = pd.read_hdf(file, '/lib/supported_tickers')
+#file = '/home/matt/Projects/Stock Project/API_project/api_project/stockDB.h5'
 
-print(table.tail(100))
+#table = pd.read_hdf(file, '/lib/supported_tickers')
+
+df = ticker.irequest('AMD', startDate, endDate)
+
+print(df.tail(20))
+
+#analysis.sma(df, 50)
+
+analysis.ema(df, 50)
+
+print(df.tail(20))

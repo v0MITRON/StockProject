@@ -59,6 +59,11 @@ def lib():
     df['endDate'] = pd.to_datetime(df['endDate'])
     df = df[(df['endDate'] > filterdate) & df.exchange.isin(exchange_list)]
     df = df.query('assetType == "Stock"')
+    
+    df = df[['ticker', 'exchange', 'assetType', 'priceCurrency',
+             'startDate', 'endDate', 'IPOyear', 'sector', 'industry',
+             'marketCap', 'name']]
+    
     print(df.head(20))
     print(df.tail(20))
     return

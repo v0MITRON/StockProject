@@ -14,16 +14,25 @@ df = pd.read_hdf(file, '/lib/supported_tickers')
 sp600df = ticker.indexupdate('sp-600')
 
 df = df.merge(sp600df, on='ticker', how='right')
+df.dropna(subset=['startDate', 'endDate'], inplace=True)
 
+
+for index, row in df.iterrows():
+    ticker = row['ticker']
+    startDate = row['startDate']
+    endDate = row['endDate']
+    
+    print(ticker + ', ' + startDate + ', ' + endDate)
+    
 #df = ticker.irequest('AMD', startDate, endDate)
 
-print(df.tail(20))
+#print(df.tail(20))
 
 #analysis.sma(df, 50)
 
 #analysis.ema(df, 50)
 
 '''
-Need to remove NaN from last couple rows of sp-600-index df.
+
 Grab start & end dates from ticker row and plug into irequest().
 '''

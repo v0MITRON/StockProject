@@ -108,6 +108,7 @@ def indexupdate(index):
     
     df = pd.DataFrame({'ticker': tempdf['Symbol'],
                        'name': tempdf['Name']})
+
     df.to_hdf(store, key=keypath, format='table', append=True)
 
     store.close()

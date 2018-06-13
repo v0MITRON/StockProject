@@ -47,7 +47,7 @@ def lib():
     tempdf = appendInfo('nyse')
     tempdf.append(appendInfo('nasdaq'), ignore_index=True)
     tempdf.append(appendInfo('amex'), ignore_index=True)
-    
+
     appdf = pd.DataFrame({'ticker': tempdf['Symbol'],
                                'name': tempdf['Name'],
                                'marketCap': tempdf['MarketCap'],
@@ -90,9 +90,27 @@ def irequest(symbol, startDate, endDate):
                        'date': tempdf['date'],
                        })
 
-    df = df.set_index(pd.DatetimeIndex(df["date"]))   
+    df = df.set_index(pd.DatetimeIndex(df["date"]))
     df = df[['open', 'adjOpen', 'high', 'adjHigh', 'low', 'adjLow', 'close',
              'adjClose', 'volume', 'adjVolume', 'splitFactor']]
+
+    return df
+
+
+def indexupdate(index):
+    store = pd.HDFStore('stockDB.h5', complevel=9, complib='zlib')
+
+    rfile = index + '-index.csv'
+    df = index + 'df'
+    keypath = '/lib/' + index
+
+    tempdf = pd.read_csv(rfile, usecols=['Symbol', 'Name'])
+    
+    df = pd.DataFrame({'ticker': tempdf['Symbol'],
+                       'name': tempdf['Name']})
+    df.to_hdf(store, key=keypath, format='table', append=True)
+
+    store.close()
 
     return df
 

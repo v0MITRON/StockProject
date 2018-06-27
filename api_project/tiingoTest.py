@@ -1,37 +1,39 @@
 import ticker
 import analysis
+import chart
 import pandas as pd
 import datetime
+import time
 
-startDate = datetime.date(2015, 1, 2)
+startDate = datetime.date(2000, 1, 2)
 endDate = datetime.date.today()
 
-#ticker.lib()
+symbol = 'DNR'
+keypath = '/history/' + symbol
+#store = pd.HDFStore('stockDB.h5', complevel=9, complib='zlib')
+#df = ticker.irequest(symbol, startDate, endDate)
+#df.to_hdf(store, key=keypath, format='table', append=True)
+#store.close()
 
-file = '/home/matt/Projects/Stock Project/API_project/api_project/stockDB.h5'
+file = '/home/matt/Projects/StockProject/API_Project/stockDB.h5'
+df = symbol
 
-df = pd.read_hdf(file, '/lib/supported_tickers')
-sp600df = ticker.indexupdate('sp-600')
+df = pd.read_hdf(file, keypath)
 
-df = df.merge(sp600df, on='ticker', how='right')
-df.dropna(subset=['startDate', 'endDate'], inplace=True)
+analysis.sma(df, 50)
+#analysis.sma(df, 90)
 
+analysis.ema(df, 50)
+#analysis.ema(df, 90)
 
-for index, row in df.iterrows():
-    ticker = row['ticker']
-    startDate = row['startDate']
-    endDate = row['endDate']
+analysis.rsi(df, 14)
+
+chart.simple_line(df)
+
+chart.candlestick(df, stick="day")
+
+print(df.tail(10))
     
-    print(ticker + ', ' + startDate + ', ' + endDate)
-    
-#df = ticker.irequest('AMD', startDate, endDate)
-
-#print(df.tail(20))
-
-#analysis.sma(df, 50)
-
-#analysis.ema(df, 50)
-
 '''
 
 Grab start & end dates from ticker row and plug into irequest().

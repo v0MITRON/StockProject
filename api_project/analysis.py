@@ -13,8 +13,10 @@ def sma(df, period):
 
 def ema(df, period):
     label = 'EMA' + str(period)
+    
+    weight = (2 / (period + 1))
 
-    df[label] = df['adjClose'].ewm(span=20, min_periods=period).mean()
+    df[label] = df['adjClose'].ewm(alpha=weight, min_periods=period).mean()
 
     return df
 
@@ -38,6 +40,24 @@ def rsi(df, period):
     df['RSI'] = RSI
     
     return df
+
+
+def macd(df):
+    ema(df, 12)
+    ema(df, 26)
+    
+    temp_df = pd.DataFrame({'EMA12': df['EMA12'],
+                            'EMA26': df['EMA26']})
+    
+    temp_df['macd'] = temp_df['EMA12'] - temp_df['EMA26']
+    
+    weight = (2 / (9 + 1))
+    temp_df['signal'] = temp_df['macd'].ewm(alpha=weight, min_periods=9).mean()
+    
+    macd_df = pd.DataFrame({'macd': temp_df['macd'],
+                            'signal': temp_df['signal']})
+    
+    macd_df.tail(120).plot(grid=True)
 
 
 if __name__ == "__main__":

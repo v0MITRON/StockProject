@@ -1,9 +1,19 @@
 import ticker
 import analysis
-import chart
+#import chart
 import pandas as pd
 import datetime
 import time
+import matplotlib.pyplot as plt
+
+def simple_line(df, view = 1095):
+    if (type(view) == int and view >= 1):
+        plot_df = df.tail(view)
+        i = plot_df.plot(grid=True)
+    else:
+        raise ValueError('"view=" needs to be int in days.')
+    
+    return i
 
 startDate = datetime.date(2000, 1, 2)
 endDate = datetime.date.today()
@@ -20,6 +30,10 @@ df = symbol
 
 df = pd.read_hdf(file, keypath)
 
+period = 50
+sm = 'MA' + str(period)
+ema = 'EMA' + str(period)
+
 analysis.sma(df, 50)
 #analysis.sma(df, 90)
 
@@ -28,11 +42,20 @@ analysis.ema(df, 50)
 
 analysis.rsi(df, 14)
 
-chart.simple_line(df)
+graph_df = pd.DataFrame({
+                       'adjClose': df['adjClose'],
+                       'sma': df[sm],
+                       'ema': df[ema],
+                       })
 
-chart.candlestick(df, stick="day")
+#chart.simple_line(df, view=1095)
+#simple_line(graph_df, view=250)
 
-print(df.tail(10))
+analysis.macd(df)
+
+#chart.candlestick(df, stick="day")
+
+#print(df.tail(10))
     
 '''
 

@@ -9,9 +9,20 @@ import numpy as np
 
 
 def simple_line(df):
-    i = df['adjClose'].plot(grid = True)
+    if (type(view) == int and view >= 1):
+        plot_df = df['adjClose'].tail(view)
+        i = plot_df.plot(grid=True)
+    else:
+        raise ValueError('"view=" needs to be int in days.')
     
     return i
+    
+    '''
+    Uhh, I don't think it shows this chart until the other def is run because 
+    the chart is not 'set-up'.
+    
+    Need to look through the def and figure that out...
+    '''
 
 
 def candlestick(df, stick = "day", otherseries = None):

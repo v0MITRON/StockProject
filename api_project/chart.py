@@ -8,7 +8,7 @@ import matplotlib.dates as mdates
 import numpy as np
 
 
-def simple_line(df):
+def simple_line(df, view = 1095):
     if (type(view) == int and view >= 1):
         plot_df = df['adjClose'].tail(view)
         i = plot_df.plot(grid=True)
@@ -23,7 +23,7 @@ def simple_line(df):
     
     Need to look through the def and figure that out...
     '''
-
+    
 
 def candlestick(df, stick = "day", otherseries = None):
     mondays = WeekdayLocator(MONDAY)

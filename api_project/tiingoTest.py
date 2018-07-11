@@ -40,7 +40,8 @@ analysis.sma(df, 50)
 analysis.ema(df, 50)
 #analysis.ema(df, 90)
 
-analysis.rsi(df, 14)
+analysis.RSI(df, 14)
+analysis.eRSI(df, 14)
 
 graph_df = pd.DataFrame({
                        'adjClose': df['adjClose'],
@@ -49,13 +50,26 @@ graph_df = pd.DataFrame({
                        })
 
 #chart.simple_line(df, view=1095)
-#simple_line(graph_df, view=250)
+simple_line(graph_df, view=250)
 
 analysis.macd(df)
 
+analysis.bollinger_bands(df, 20)
+
+analysis.mfi(df, 14)
+
+analysis.chaikin_oscillator(df, 3, 10)
+analysis.chaikin_oscillator(df, 6, 20)
+'''
+Need to add something to skip running all the calculations
+if they have already been done.
+'''
+analysis.stochastic_oscillator(df, 14, 3, indicator='Slow')
+analysis.stochastic_oscillator(df, 14, 3, indicator='Fast')
+
 #chart.candlestick(df, stick="day")
 
-#print(df.tail(10))
+print(df.tail(10))
     
 '''
 

@@ -1,6 +1,8 @@
-import ticker
-import analysis
-#import chart
+
+from modules import ticker
+from modules import analysis
+#from modules import chart
+from modules import indicator
 import pandas as pd
 import datetime
 import time
@@ -27,49 +29,65 @@ keypath = '/history/' + symbol
 
 file = '/home/matt/Projects/StockProject/API_Project/stockDB.h5'
 df = symbol
-
 df = pd.read_hdf(file, keypath)
 
-period = 50
-sm = 'MA' + str(period)
-ema = 'EMA' + str(period)
 
-analysis.sma(df, 50)
-#analysis.sma(df, 90)
+analysis.eval_RSI(df, 14)
 
-analysis.ema(df, 50)
-#analysis.ema(df, 90)
 
-analysis.RSI(df, 14)
-analysis.eRSI(df, 14)
+#weekly_df = analysis.eval_group(df, group='week')
+#print(weekly_df.tail(4))
+#monthly_df = analysis.eval_group(df, group='month')
+#print(monthly_df.tail(4))
+#quarterly_df = analysis.eval_group(df, group='quarter')
+#print(quarterly_df.tail(4))
+#yearly_df = analysis.eval_group(df, group='year')
+#print(yearly_df.tail(4))
+#
+#period = 50
+#sm = 'MA' + str(period)
+#ema = 'EMA' + str(period)
 
-graph_df = pd.DataFrame({
-                       'adjClose': df['adjClose'],
-                       'sma': df[sm],
-                       'ema': df[ema],
-                       })
+#indicator.sma(df, 50)
+#indicator.sma(df, 90)
+
+#indicator.ema(df, 50)
+#indicator.ema(df, 90)
+
+#indicator.RSI(df, 14)
+#indicator.eRSI(df, 14)
+
+#graph_df = pd.DataFrame({
+#                       'adjClose': df['adjClose'],
+#                       'sma': df[sm],
+#                       'ema': df[ema],
+#                       })
 
 #chart.simple_line(df, view=1095)
-simple_line(graph_df, view=250)
+#simple_line(graph_df, view=250)
 
-analysis.macd(df)
+#indicator.macd(df)
 
-analysis.bollinger_bands(df, 20)
+#indicator.bollinger_bands(df, 20)
 
-analysis.mfi(df, 14)
+#indicator.mfi(df, 14)
 
-analysis.chaikin_oscillator(df, 3, 10)
-analysis.chaikin_oscillator(df, 6, 20)
+#indicator.chaikin_oscillator(df, 3, 10)
+#indicator.chaikin_oscillator(df, 6, 20)
 '''
 Need to add something to skip running all the calculations
 if they have already been done.
 '''
-analysis.stochastic_oscillator(df, 14, 3, indicator='Slow')
-analysis.stochastic_oscillator(df, 14, 3, indicator='Fast')
+#indicator.stochastic_oscillator(df, 14, 3, indicator='Slow')
+#indicator.stochastic_oscillator(df, 14, 3, indicator='Fast')
 
 #chart.candlestick(df, stick="day")
 
-print(df.tail(10))
+#print(df.tail(10))
+
+
+
+
     
 '''
 

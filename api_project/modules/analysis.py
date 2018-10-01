@@ -74,48 +74,53 @@ def eval_group(df, group):
 
 temp_df = pd.DataFrame({})
 
-def pnc(temp_df, g=0, l=0, diff=False, tc='x', Nc='y'):
+def pnc(temp_df, g=0, l=0, f=1, s=-1, diff=False, tc='x', Nc='y'):
     if diff == True:
-        temp_df[Nc] = np.where(temp_df[tc].diff() > g, 1, 0)
-        temp_df[Nc] = np.where(temp_df[tc].diff() < l, -1, temp_df[Nc])
+        temp_df[Nc] = np.where(temp_df[tc].diff() > g, f, 0)
+        temp_df[Nc] = np.where(temp_df[tc].diff() < l, s, temp_df[Nc])
     else:
-        temp_df[Nc] = np.where(temp_df[tc] > g, 1, 0)
-        temp_df[Nc] = np.where(temp_df[tc] < l, -1, temp_df[Nc])
-    
+        temp_df[Nc] = np.where(temp_df[tc] > g, f, 0)
+        temp_df[Nc] = np.where(temp_df[tc] < l, s, temp_df[Nc])
+
     return temp_df[Nc]
 
+
+def pnCc(temp_df, f=1, s=-1, c1='x', c2='y', c3='z', Nc='a'):
+    if c3 == 'z':
+        c3 = c2
+    
+    temp_df[Nc] = np.where(temp_df[c1] > temp_df[c2], f, 0)
+    temp_df[Nc] = np.where(temp_df[c1] < temp_df[c3], s, temp_df[Nc])
+
+    return temp_df[Nc]
+
+
 def direction(temp_df, c='x'):
-#    temp_df['dir'] = np.where(temp_df[c].diff() > 0, 1, 0)
-#    temp_df['dir'] = np.where(temp_df[c].diff() < 0, -1, temp_df['dir'])
-    temp_df['dir'] = pnc(temp_df, g=0, l=0, diff=True, tc=c, Nc='dir')
+    temp_df['dir'] = pnc(temp_df, diff=True, tc=c, Nc='dir')
 
     return temp_df['dir']
 
 
 def condition(temp_df, ob, os, c='x'):
-#    temp_df['cond'] = np.where(temp_df[c] > ob, 1, 0)
-#    temp_df['cond'] = np.where(temp_df[c] < os, -1, temp_df['cond'])
-    temp_df['cond'] = pnc(temp_df, g=ob, l=os, diff=False, tc=c, Nc='cond')
+    temp_df['cond'] = pnc(temp_df, g=ob, l=os, tc=c, Nc='cond')
 
     return temp_df['cond']
 
 
 def divergence(temp_df, c='x'):
     #divergence
-    temp_df['D1'] = np.where(temp_df[c].diff() > 0, 1, 0)
-    temp_df['D1'] = np.where(temp_df[c].diff() < 0, -1, temp_df['D1'])
-    temp_df['D2'] = np.where(temp_df['close'].diff() > 0, -1, 0)
-    temp_df['D2'] = np.where(temp_df['close'].diff() < 0, 1, temp_df['D2'])
-
+    temp_df['D1'] = pnc(temp_df, diff=True, tc=c, Nc='D1')
+    temp_df['D2'] = pnc(temp_df, f=-1, s=1, diff=True, tc='close', Nc='D2')
     temp_df['DSUM'] = temp_df['D1'] + temp_df['D2']
     #bullish divergence    
     temp_df['BLD'] = np.where(temp_df['DSUM'] == 2, 1, 0)
     #bearish divergence
-    temp_df['BRD'] = np.where(temp_df['DSUM'] == -2, 1, 0)
+    temp_df['BRD'] = np.where(temp_df['DSUM'] == -2, -1, 0)
     
     temp_df['div'] = temp_df['BLD'] + temp_df['BRD']
     
     return temp_df['div']
+
 
 '''
  General case to be used for eithe RSI or eRSI.
@@ -173,14 +178,11 @@ def eval_MACD(df, analysis_df):
     temp_df = pd.DataFrame({'fast': df['macd'],
                             'slow': df['signal'],
                             'hd': df['macd-histogram']})
-    
-    temp_df['abs'] = np.where(temp_df['slow'] > 0, 1, 0)
-    temp_df['abs'] = np.where(temp_df['slow'] < 0, -1, temp_df['abs'])
-    temp_df['macd'] = np.where(temp_df['fast'] > temp_df['slow'], 1, 0)
-    temp_df['macd'] = np.where(temp_df['fast'] < temp_df['slow'], -1, temp_df['macd'])
+
+    temp_df['abs'] = pnc(temp_df, g=0, l=0, diff=False, tc='slow', Nc='abs')
+    temp_df['macd'] = pnCc(temp_df, c1='fast', c2='slow', Nc='macd')
     temp_df['diff'] = ((temp_df['fast'] - temp_df['slow']) * 100) / temp_df['slow']
-    temp_df['osc'] = np.where(temp_df['hd'] > 0, 1, 0)
-    temp_df['osc'] = np.where(temp_df['hd'] < 0, -1, temp_df['osc'])
+    temp_df['osc'] = pnc(temp_df, g=0, l=0, diff=False, tc='hd', Nc='osc')
    
     analysis_df['MACDabs'] = temp_df['abs']
     analysis_df['MACDosc'] = temp_df['osc']
@@ -288,12 +290,9 @@ def eval_stochastic_oscillator(df, analysis_df):
                             'close': df['adjClose']})
 
     temp_df['cond'] = condition(temp_df, ob=80, os=20, c='%D')
-    temp_df['ctr'] = np.where(temp_df['%D'] > 50, 1, 0)
-    temp_df['ctr'] = np.where(temp_df['%D'] < 50, -1, temp_df['ctr'])
-    temp_df['sto.osc'] = np.where(temp_df['%K'] > temp_df['%D'], 1, 0)
-    temp_df['sto.osc'] = np.where(temp_df['%K'] < temp_df['%D'], -1, temp_df['sto.osc'])
-    temp_df['diff'] = ((temp_df['%K'] - temp_df['%D']) * 100) / temp_df['%D']
-    
+    temp_df['ctr'] = pnc(temp_df, g=50, l=50, diff=False, tc='%D', Nc='ctr')
+    temp_df['sto.osc'] = pnCc(temp_df, c1='%K', c2='%D', Nc='sto.osc')
+    temp_df['diff'] = ((temp_df['%K'] - temp_df['%D']) * 100) / temp_df['%D']    
     temp_df['div'] = divergence(temp_df, c='%D')
   
     analysis_df['SOCond'] = temp_df['cond']
@@ -308,23 +307,20 @@ def eval_stochastic_oscillator(df, analysis_df):
 def eval_bollinger_bands(df, analysis_df):
     indicator.bollinger_bands(df, 20)
     
-    bd_df = pd.DataFrame({'mid': df['mid_band'],
+    temp_df = pd.DataFrame({'mid': df['mid_band'],
                           'upp': df['upp_band'],
                           'low': df['low_band'],
                           'close': df['adjClose']})
+
+    temp_df['ctr'] = pnCc(temp_df, c1='close', c2='mid', Nc='ctr')
+    temp_df['uR'] = (temp_df['upp'] - (temp_df['upp'] * .02))
+    temp_df['lR'] = (temp_df['low'] + (temp_df['low'] * .02))
+    temp_df['cond'] = pnCc(temp_df, c1='close', c2='uR', c3='lR', Nc='cond')
+    temp_df['Xcond'] = pnCc(temp_df, c1='close', c2='upp', c3='low', Nc='Xcond')
     
-    bd_df['ctr'] = np.where(bd_df['close'] > bd_df['mid'], 1, 0)
-    bd_df['ctr'] = np.where(bd_df['close'] < bd_df['mid'], -1, bd_df['ctr'])
-    bd_df['uR'] = (bd_df['upp'] - (bd_df['upp'] * .02))
-    bd_df['lR'] = (bd_df['low'] + (bd_df['low'] * .02))
-    bd_df['cond'] = np.where(bd_df['close'] > bd_df['uR'], 1, 0) 
-    bd_df['cond'] = np.where(bd_df['close'] < bd_df['lR'], -1, bd_df['cond'])
-    bd_df['Xcond'] = np.where(bd_df['close'] > bd_df['upp'], 1, 0) 
-    bd_df['Xcond'] = np.where(bd_df['close'] < bd_df['low'], -1, bd_df['Xcond'])
-    
-    analysis_df['BBCtr'] = bd_df['ctr']
-    analysis_df['BBCond'] = bd_df['cond']
-    analysis_df['BBXcond'] = bd_df['Xcond']
+    analysis_df['BBCtr'] = temp_df['ctr']
+    analysis_df['BBCond'] = temp_df['cond']
+    analysis_df['BBXcond'] = temp_df['Xcond']
     
     return df, analysis_df
 
@@ -352,9 +348,7 @@ def eval_chaikin_oscillator(df, analysis_df):
     temp_df = pd.DataFrame({'close': df['adjClose'],
                             'cho': df['ChaikinOsc']})
 
-    temp_df['osc'] = np.where(temp_df['cho'] > 0, 1, 0)
-    temp_df['osc'] = np.where(temp_df['cho'] < 0, -1, temp_df['osc'])
-    
+    temp_df['osc'] = pnc(temp_df, tc='cho', Nc='osc')
     temp_df['dir'] = direction(temp_df, c='cho')
     temp_df['div'] = divergence(temp_df, c='cho')
     

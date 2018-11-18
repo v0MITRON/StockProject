@@ -3,6 +3,7 @@ from modules import ticker
 from modules import analysis
 #from modules import chart
 from modules import indicator
+from modules import summary
 import pandas as pd
 import datetime
 import time
@@ -31,9 +32,26 @@ file = '/home/matt/Projects/StockProject/API_Project/stockDB.h5'
 df = symbol
 df = pd.read_hdf(file, keypath)
 
+currency = 'EURUSD'
+tempdf = pd.DataFrame({})
+ticker.fxrequest(currency)
+print(tempdf)
 
-analysis.eval_RSI(df, 14)
+#Initiate analysis_df before running any evals
+#analysis_df = pd.DataFrame({})
 
+#indicator.ema(df, 50)
+#analysis.ema_group(df, analysis_df)
+#analysis.eval_eRSI(df, 14, analysis_df)
+#analysis.eval_MACD(df, analysis_df)
+#analysis.eval_stochastic_oscillator(df, analysis_df)
+#analysis.eval_bollinger_bands(df, analysis_df)
+#analysis.eval_mfi(df, analysis_df)
+#analysis.eval_chaikin_oscillator(df, analysis_df)
+
+#analysis.eval_matrix(df, analysis_df)
+
+#print(analysis_df.tail(10))
 
 #weekly_df = analysis.eval_group(df, group='week')
 #print(weekly_df.tail(4))
@@ -51,7 +69,7 @@ analysis.eval_RSI(df, 14)
 #indicator.sma(df, 50)
 #indicator.sma(df, 90)
 
-#indicator.ema(df, 50)
+
 #indicator.ema(df, 90)
 
 #indicator.RSI(df, 14)
@@ -67,11 +85,8 @@ analysis.eval_RSI(df, 14)
 #simple_line(graph_df, view=250)
 
 #indicator.macd(df)
-
 #indicator.bollinger_bands(df, 20)
-
 #indicator.mfi(df, 14)
-
 #indicator.chaikin_oscillator(df, 3, 10)
 #indicator.chaikin_oscillator(df, 6, 20)
 '''
@@ -80,6 +95,7 @@ if they have already been done.
 '''
 #indicator.stochastic_oscillator(df, 14, 3, indicator='Slow')
 #indicator.stochastic_oscillator(df, 14, 3, indicator='Fast')
+#indicator.stochastic_oscillator(df, 14, 3, indicator='Full')
 
 #chart.candlestick(df, stick="day")
 

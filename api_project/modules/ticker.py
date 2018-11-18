@@ -97,6 +97,24 @@ def irequest(symbol, startDate, endDate):
     return df
 
 
+def fxrequest(symbol):
+    base = 'http://forex.1forge.com/1.0.2/'
+    getQuote = 'quotes?pairs='
+    api = '&api_key=dyvrXDt0R85Qnv31EDe6akGmNr9tFQIH'
+    df = symbol
+    
+    tempdf = pd.read_json(base + getQuote + symbol + api)
+    tempdf = pd.DataFrame(tempdf)
+    type(tempdf)
+    
+    print(tempdf)
+    
+    df = pd.DataFrame({})
+    
+    return tempdf
+    
+
+
 def indexupdate(index):
     store = pd.HDFStore('stockDB.h5', complevel=9, complib='zlib')
 

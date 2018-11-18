@@ -20,6 +20,24 @@ def ema(df, period):
     return df
 
 
+def sma_vol(df, period):
+    label = 'volMA' + str(period)
+
+    df[label] = np.round(df['adjVolume'].rolling(window=period).mean(), 2)
+
+    return df
+
+
+def ema_vol(df, period):
+    label = 'volEMA' + str(period)
+
+    weight = (2 / (period + 1))
+
+    df[label] = df['adjVolume'].ewm(alpha=weight, min_periods=period).mean()
+
+    return df
+
+
 def RSI(df, period):
     temp_df = pd.DataFrame({'close': df['adjClose']})
 
@@ -103,14 +121,14 @@ def bollinger_bands(df, period):
     df['upp_band'] = df[label] + (std_dev * 2)
     df['low_band'] = df[label] - (std_dev * 2)
 
-    boll_band_df = pd.DataFrame({'mid': df['mid_band'],
+    bd_df = pd.DataFrame({'mid': df['mid_band'],
                                  'upp': df['upp_band'],
                                  'low': df['low_band'],
                                  'close': df['adjClose']})
 
-    boll_band_df.tail(120).plot(grid=True)
+    bd_df.tail(120).plot(grid=True)
 
-    return df
+    return df, bd_df
 
 
 def stochastic_oscillator(df, period, smooth, indicator):

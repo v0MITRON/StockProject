@@ -6,13 +6,107 @@ from modules import indicator
 Create def to interpret analysis matrix as sentences.
 '''
 
-def ema_group(df):
+temp_df = pd.DataFrame({})
+
+
+'''
+ Common analysis:
+     temp_df['dir'] - direction up/down
+     temp_df['cond'] - condition (overbought/oversold; )
+     temp_df['Xcond'] - extreme condition
+     temp_df['abs'] - absolute, above/below zero line
+     temp_df['div'] - bull/bear divergences
+'''
+
+'''
+ Positive/Negative Column
+'''
+def pnc(temp_df, g=0, l=0, f=1, s=-1, diff=False, tc='x', Nc='y'):
+    if diff == True:
+        temp_df[Nc] = np.where(temp_df[tc].diff() > g, f, 0)
+        temp_df[Nc] = np.where(temp_df[tc].diff() < l, s, temp_df[Nc])
+    else:
+        temp_df[Nc] = np.where(temp_df[tc] > g, f, 0)
+        temp_df[Nc] = np.where(temp_df[tc] < l, s, temp_df[Nc])
+
+    return temp_df[Nc]
+
+'''
+ Positive/Negative Compare Column
+'''
+def pnCc(temp_df, f=1, s=-1, c1='x', c2='y', c3='z', Nc='a'):
+    if c3 == 'z':
+        c3 = c2
+    
+    temp_df[Nc] = np.where(temp_df[c1] > temp_df[c2], f, 0)
+    temp_df[Nc] = np.where(temp_df[c1] < temp_df[c3], s, temp_df[Nc])
+
+    return temp_df[Nc]
+
+
+def direction(temp_df, c='x'):
+    temp_df['dir'] = pnc(temp_df, diff=True, tc=c, Nc='dir')
+
+    return temp_df['dir']
+
+
+def condition(temp_df, ob, os, c='x'):
+    temp_df['cond'] = pnc(temp_df, g=ob, l=os, tc=c, Nc='cond')
+
+    return temp_df['cond']
+
+
+def divergence(temp_df, c='x'):
+    #divergence
+    temp_df['D1'] = pnc(temp_df, diff=True, tc=c, Nc='D1')
+    temp_df['D2'] = pnc(temp_df, f=-1, s=1, diff=True, tc='close', Nc='D2')
+    temp_df['DSUM'] = temp_df['D1'] + temp_df['D2']
+    #bullish divergence    
+    temp_df['BLD'] = np.where(temp_df['DSUM'] == 2, 1, 0)
+    #bearish divergence
+    temp_df['BRD'] = np.where(temp_df['DSUM'] == -2, -1, 0)
+    
+    temp_df['div'] = temp_df['BLD'] + temp_df['BRD']
+    
+    return temp_df['div']
+
+
+def ema_group(df, analysis_df):
     indicator.ema(df, 10)
     indicator.ema(df, 50)
     indicator.ema(df, 90)
     indicator.ema(df, 200)
+    indicator.sma_vol(df, 20)
 
-    return df
+    temp_df = pd.DataFrame({'close': df['adjClose'],
+                            'volume':df['adjVolume']})
+    temp_df['EMA10'] = df['EMA10']
+    temp_df['EMA50'] = df['EMA50']
+    temp_df['EMA90'] = df['EMA90']
+    temp_df['EMA200'] = df['EMA200']
+    temp_df['vMA20'] = df['volMA20']
+
+    analysis_df['eMA10'] = pnCc(temp_df, c1='close', c2='EMA10', Nc='eMA10')
+    analysis_df['eMA50'] = pnCc(temp_df, c1='close', c2='EMA50', Nc='eMA50')
+    analysis_df['eMA90'] = pnCc(temp_df, c1='close', c2='EMA90', Nc='eMA90')
+    analysis_df['eMA200'] = pnCc(temp_df, c1='close', c2='EMA200', Nc='eMA200')
+    analysis_df['volMA20'] = pnCc(temp_df, c1='volume', c2='vMA20', Nc='volMA20')
+
+    analysis_df['eMA10diff'] = temp_df['close'] - temp_df['EMA10']
+    analysis_df['eMA50diff'] = temp_df['close'] - temp_df['EMA50']
+    analysis_df['eMA90diff'] = temp_df['close'] - temp_df['EMA90']
+    analysis_df['eMA200diff'] = temp_df['close'] - temp_df['EMA200']
+
+    analysis_df['eMA10%diff'] = (abs(temp_df['close'] - temp_df['EMA10']) 
+                                 / temp_df['EMA10'])*100
+    analysis_df['eMA50%diff'] = (abs(temp_df['close'] - temp_df['EMA50'])
+                                 / temp_df['EMA50'])*100
+    analysis_df['eMA90%diff'] = (abs(temp_df['close'] - temp_df['EMA90'])
+                                 / temp_df['EMA90'])*100
+    analysis_df['eMA200%diff'] = (abs(temp_df['close'] - temp_df['EMA200'])
+                                  / temp_df['EMA200'])*100
+
+    return df, analysis_df
 
 
 def eval_group(df, group):
@@ -63,64 +157,6 @@ def eval_group(df, group):
 
     return peval
 
-'''
- Common analysis:
-     temp_df['dir'] - direction up/down
-     temp_df['cond'] - condition (overbought/oversold; )
-     temp_df['Xcond'] - extreme condition
-     temp_df['abs'] - absolute, above/below zero line
-     temp_df['div'] - bull/bear divergences
-'''
-
-temp_df = pd.DataFrame({})
-
-def pnc(temp_df, g=0, l=0, f=1, s=-1, diff=False, tc='x', Nc='y'):
-    if diff == True:
-        temp_df[Nc] = np.where(temp_df[tc].diff() > g, f, 0)
-        temp_df[Nc] = np.where(temp_df[tc].diff() < l, s, temp_df[Nc])
-    else:
-        temp_df[Nc] = np.where(temp_df[tc] > g, f, 0)
-        temp_df[Nc] = np.where(temp_df[tc] < l, s, temp_df[Nc])
-
-    return temp_df[Nc]
-
-
-def pnCc(temp_df, f=1, s=-1, c1='x', c2='y', c3='z', Nc='a'):
-    if c3 == 'z':
-        c3 = c2
-    
-    temp_df[Nc] = np.where(temp_df[c1] > temp_df[c2], f, 0)
-    temp_df[Nc] = np.where(temp_df[c1] < temp_df[c3], s, temp_df[Nc])
-
-    return temp_df[Nc]
-
-
-def direction(temp_df, c='x'):
-    temp_df['dir'] = pnc(temp_df, diff=True, tc=c, Nc='dir')
-
-    return temp_df['dir']
-
-
-def condition(temp_df, ob, os, c='x'):
-    temp_df['cond'] = pnc(temp_df, g=ob, l=os, tc=c, Nc='cond')
-
-    return temp_df['cond']
-
-
-def divergence(temp_df, c='x'):
-    #divergence
-    temp_df['D1'] = pnc(temp_df, diff=True, tc=c, Nc='D1')
-    temp_df['D2'] = pnc(temp_df, f=-1, s=1, diff=True, tc='close', Nc='D2')
-    temp_df['DSUM'] = temp_df['D1'] + temp_df['D2']
-    #bullish divergence    
-    temp_df['BLD'] = np.where(temp_df['DSUM'] == 2, 1, 0)
-    #bearish divergence
-    temp_df['BRD'] = np.where(temp_df['DSUM'] == -2, -1, 0)
-    
-    temp_df['div'] = temp_df['BLD'] + temp_df['BRD']
-    
-    return temp_df['div']
-
 
 '''
  General case to be used for eithe RSI or eRSI.
@@ -168,6 +204,13 @@ def eval_eRSI(df, period, analysis_df):
     temp_df['cond'] = condition(temp_df, ob=70, os=30, c='RSI')
     
     analysis_df['eRSIcond'] = temp_df['cond']
+    
+    return df, analysis_df
+
+
+def RSI_osUp(df, period, analysis_df, MinPrice, MinVol):
+    #do all analysis here.  don't run extra functions if you aren't looking for them!!
+    indicator.RSI(df, period)
     
     return df, analysis_df
 
@@ -359,10 +402,19 @@ def eval_chaikin_oscillator(df, analysis_df):
     return df, analysis_df
 
 
-def eval_matrix(analysis_df):
-#run all evals    
-    return analysis_df
+def eval_matrix(df, analysis_df):
+    ema_group(df, analysis_df)
+    eval_eRSI(df, 14, analysis_df)
+    eval_MACD(df, analysis_df)
+    eval_stochastic_oscillator(df, analysis_df)
+    eval_bollinger_bands(df, analysis_df)
+    eval_mfi(df, analysis_df)
+    eval_chaikin_oscillator(df, analysis_df)
+    
+    return df, analysis_df
 
-def eval_analysis(analysis_df):
-#interpret the matrix!    
-    return analysis_df
+def eval_analysis(df, analysis_df):
+    eval_matrix(df, analysis_df)
+    
+    
+    return df, analysis_df
